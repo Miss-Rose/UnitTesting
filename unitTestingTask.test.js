@@ -1,4 +1,4 @@
-const obj = {
+const mockTokensObj = {
     'YYYY': {res: '2022', title: '**YYYY**: 4-digit year'},
     'YY': {res: '22', title: '**YY**: last 2 digit of year'},
     'MMMM': {res: 'August', title: '**MMMM**: full name of month'},
@@ -29,70 +29,74 @@ const obj = {
 const unitTestingTask = require('./unitTestingTask');
 
 const todayDate = new Date(2022, 7, 3, 23, 7, 20, 4);
-beforeAll(() => {
-    jest.useFakeTimers('modern');
-    jest.setSystemTime(todayDate);
-});
 
-afterAll(() => {
-    jest.useRealTimers();
-});
+describe('Test unitTestingTask func', () => {
 
-describe('unit Testing Task', () => {
+    // beforeAll and afterAll routines inside of my test "describe" because fake time is only needed for this test block
+    beforeAll(() => {
+        jest.useFakeTimers('modern');
+        jest.setSystemTime(todayDate);
+    });
 
-    Object.keys(obj).forEach((key) => {
-        it(`should show ${obj[key].title}`, function () {
-            expect(unitTestingTask(key)).toBe(obj[key].res);
+    afterAll(() => {
+        jest.useRealTimers();
+    });
+
+    Object.keys(mockTokensObj).forEach((key) => {
+        const token = key;
+        it(`should show data in format ${mockTokensObj[token].title}`, function () {
+            expect(unitTestingTask(token)).toBe(mockTokensObj[token].res);
         });
     });
 });
 
-describe('unit Testing task Errors', () => {
+describe('Test errors in unitTestingTask func', () => {
 
-    it('Without argument', function () {
-        expect(unitTestingTask).toThrowError(new TypeError('Argument `format` must be a string'));
+    it('When unitTestingTask func is without argument', function () {
+        expect(() => unitTestingTask()).toThrowError(new TypeError('Argument `format` must be a string'));
     });
 
-    it('Without argument that is not a string', function () {
+    it('When unitTestingTask func is with argument that is not a string', function () {
         expect(() => { unitTestingTask(4535) }).toThrow('Argument `format` must be a string');
     });
 
-    it('Argument `date` must be instance of Date or Unix Timestamp or ISODate String', () => {
+    it('When unitTestingTask func has argument that isn\'t a instance of Date/Unix Timestamp/ISODate String', () => {
         expect(() => {
             unitTestingTask('YYYY-MM-dd', null)
         }).toThrowError(new TypeError('Argument `date` must be instance of Date or Unix Timestamp or ISODate String'));
     });
 });
 
-describe('Languages and formats', () => {
+describe('Test for languages and formats', () => {
     it('should return English lang default', function () {
         expect(unitTestingTask._languages.current).toBe('en');
     });
 
-    it('check language', function () {
+    it('should return previously set language', function () {
         expect(unitTestingTask.lang('uk')).toBe('uk');
     });
 
-    it('should return data according to format', function () {
+    it('should return time data according to given format', function () {
         unitTestingTask.register('myFormat', 'd MMMM');
         expect(unitTestingTask('myFormat')).toBe(unitTestingTask('d MMMM'));
     });
 
-    const tempISO = {
+    const formatsISO = {
         'ISODate': 'YYYY-MM-dd',
         'ISOTime': 'hh:mm:ss',
         'ISODateTime': 'YYYY-MM-ddThh:mm:ss',
         'ISODateTimeTZ': 'YYYY-MM-ddThh:mm:ssZ',
     };
 
-    Object.entries(tempISO).forEach((key) => {
-        it('should return data in format', function () {
-            expect(unitTestingTask(key[0])).toBe(unitTestingTask(key[1]));
+    Object.entries(formatsISO).forEach((key) => {
+        const [ formatName, formatPattern ] = key;
+        it(`should return data in ${formatName} format`, function () {
+            expect(unitTestingTask(formatName)).toBe(unitTestingTask(formatPattern));
         });
     });
 });
 
-test('Creates formatting function and files', function () {
+test('Creates formatting function and files, should return custom formats', function () {
     unitTestingTask._formatters = {
         'myform1': () => {},
         'myform2': () => {},
