@@ -18,7 +18,7 @@
     }
   },
   "scripts": {
-    "test": "jest --coverage"
+    "test": "TZ='Europe/Kiev' jest --coverage"
   },
   "devDependencies": {
     "jest": "^28.1.3"
